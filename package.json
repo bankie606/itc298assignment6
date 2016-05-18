@@ -1,0 +1,32 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bankie606/itc298assignment5.git"
+  },
+  "keywords": [
+    "ITC298",
+    "Assignment",
+    "4"
+  ],
+  "author": "Frankie Crescioni",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bankie606/itc298assignment5/issues"
+  },
+  "homepage": "https://github.com/bankie606/itc298assignment5#readme",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "cors": "^2.7.1",
+    "express": "^4.13.4",
+    "express-handlebars": "^3.0.0",
+    "handlebars": "^4.0.5",
+    "mongoose": "^4.4.17"
+  }
+}

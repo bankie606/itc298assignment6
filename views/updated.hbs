@@ -1,0 +1,34 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+{{#if result}}
+     <h2>{{result.action}} - {{synth.brand}}</h2>
+{{else}}
+    <h2>{{synth.brand}}</h2>
+{{/if}}
+<h1>UPDATED</h1>
+<form method="POST" action="/add">
+    <input type="text" name="brand" placeholder="brand" value="{{synth.brand}}" required>
+    <input type="text" name="model" placeholder="model" value="{{synth.model}}" >
+    <input type="text" name="price" placeholder="price"  value="{{synth.price}}">
+
+
+    <button>{{#if synth.id}}Update{{else}}Add{{/if}}</button>
+</form>
+<br>
+<h3>Items in the list</h3>
+<p>{{result}}</p>
+
+<script>
+
+
+    $(document).ready(function(){
+        var buttons = $('button');
+        buttons.on('click', function() {
+            var $this = $(this);
+            var action = $this.text().toLowerCase();
+            if (action == 'update') { action = 'add'; }
+            console.log(action);
+            $("form").attr("action", "/" + action);
+        });
+    });
+</script>
+
