@@ -10,7 +10,7 @@ app.use('/api', require('cors')());
 app.use(express.static(__dirname + '../views'));
 
 //set template engine
-var handlebars = require('express-handlebars').create({defaultLayout: 'main', extname: '.hbs'  });
+var handlebars = require('express-handlebars').create({defaultLayout: 'main', extnamemongo: '.hbs'  });
 app.engine('hbs', handlebars.engine);
 app.set('view engine', 'hbs' );
 

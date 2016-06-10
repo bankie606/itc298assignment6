@@ -1,75 +1,149 @@
-var main = require('../handlers/main.js');
-var synth = require ('../lib/synths.js');
-
 module.exports = function(app){
+var synth = require ('../models/synths.js');
 
-app.get('/', function(req,res){
-    res.type('text/html');
-    res.render('home', {synth: synth.getAll()});    
+
+
+
+// ROUTES FOR OUR API
+// =============================================================================
+//var router = express.Router();              // get an instance of the express Router
+
+// middleware to use for all requests
+app.use(function(req, res, next) {
+    // do logging
+    console.log("connected to mongodb");
+    next(); // make sure we go to the next routes and don't stop here
 });
 
-app.get('/detail/:brand', function(req,res){
-    res.type('text/html');
-    console.log(req.params.brand);
-    var found = synth.getSynth(req.params.brand);
-    if (!found) {
-        found = {brand: req.params.brand};
+//invoke bodyparser
+
+
+//api routes
+app.get('/api/synths', function(req,res){
+    synths = synth.getAll();
+    if (synths){
+    res.json(synth.getAll());
+    }else {
+        res.status(404).send("404 - not found");
     }
-    console.log(found);
-    res.render('detail', {synth: found} );      
 });
 
+app.get('/api/detail/:brand', function(req,res){
+   var found = synth.getSynth(req.params.brand);{
+            if(found !=''){
+                res.json(found);      
+            }else{
+                res.status(404).send("404 - not found");       
+            }
+}
+});
+
+app.post('/api/add', function(req,res) {
+        console.log(req.body);
+        new Synth({
+                    "brand": req.body.brand,
+                    "model":req.body.model,
+                    "price":req.body.price
+                }).save();
+        
+        synth.find(function(err,games){
+            
+            if(err) return console.error(err);
+            
+            if (synths){
+                res.json(synths);    
+            }else{
+                res.status(404).send("404 - not found");    
+            }
+        }); 
+     });
+
+
+//express routes
+
+app.get('/', function(req,res, next){
+    synth.find(function (err, synths) {
+        if (err) return next(err);
+        if (!synths) return next();
+        res.type('text/html');
+        res.render('home', {synth: synths});    
+    });
+});
 
 app.get('/about', function(req,res){
     res.type('text/html');
     res.render('about');
 });
 
-app.get('/detail', function(req,res){
-    res.type('text/html');
-    var found = synth.getSynth( req.body.search_term);
-    
-    res.render('detail', {synth: found} );    
+app.get('/detail/:brand', function(req,res, next){
+    var brand = req.params.brand;
+    console.log(req.params.brand);
+    synth.findOne({"brand": brand},function(err, found_synth) {
+        if (err) return next(err);
+        res.type('text/html');
+    if (!found_synth) {
+        found_synth = {brand: req.params.brand};
+    }
+    console.log(found_synth);
+        res.render('detail',{synth:found_synth});
+    });
 });
 
-
-app.post('/search', function(req,res){
-    res.type('text/html');
+    // //Search function
+    // app.post('/search', function(req, res,next) {
+    //     var found = req.params.brand;
+    //     console.log(req.params.brand);
+    //     synth.findOne({"brand": found}, function (err, found_synth) {
+    //         if (err) return next(err);
+    //         if (!found_synth) {
+    //             found_synth = {synth: req.params.brand};
+    //         }
+    //         res.type('text/html');
+    //         res.render('detail', {synth: found_synth} );    
+    //     });
+    // });
     
-    var found = synth.getSynth( req.body.search_term.toLowerCase());
     
+    //Search function
+    app.post('/search', function(req, res, next) {
+        var found = req.params.brand;
+        synth.findOne({"brand": found}, function (err, found) {
+            if (err) return next(err);
+            if (!found) {
+                found = {brand: req.params.brand};
+            }
+            res.type('text/html');
     console.log(found);
-    if (found) {
-        res.render('search', {synth: found});
-    } else {
-        res.render('searchfail');
-    }
+            res.render('detail', {brand: found} );    
+        });
+    });
     
-});
     
 
-app.post('/add', function(req,res) {
-    res.type('text/html');
-    var newSynth = {"brand":req.body.brand, "model":req.body.model, "price":req.body.price};
-    var result = synth.add(newSynth);
-    if (result.added) {
-        res.render('add', {result: result.total});
-        console.log (result.total);
-    } else {
-        res.render('updated', {result: result.total});
-    }
-});
 
-app.post('/delete', function(req,res){
-    res.type('text/html');
-    var result = synth.delete(req.body.brand);
-    if (result.deleted) {
-        res.render('deleted', {result: result.total});
-        console.log (result.total);
-    } else {
-        res.send(req.body.brand + ' not found' + back_link);
-    }
-});
+//issues here 
+ app.post('/add', function(req,res) {
+         var newSynth = {"brand":req.params.brand, "model":req.params.model, "price":req.params.price};
+        synth.findByIdAndUpdate({_id:req.params.id}, newSynth, function(err, result) {
+            if (err) {
+                    console.log(newSynth);
+                new synth(newSynth).save(function(err){
+                action = "Added";
+                 res.render('add', {synth: newSynth, result: "Added"} );            
+                });
+            } else {
+             res.render('add', {synth: newSynth, result: "Updated"} ); 
+            }
+        });
+    });
 
-
+//issues here 
+    app.post('/delete', function(req,res) {
+        synth.remove({"_id":req.params.id }, function(err) {
+            var action = (err) ? err : "Deleted";
+            res.type('text/html');
+            res.render('detail', {synth: {}, result: action} );            
+        });
+    });
 };
+
