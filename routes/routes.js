@@ -89,24 +89,9 @@ app.get('/detail/:brand', function(req,res, next){
     });
 });
 
-    // //Search function
-    // app.post('/search', function(req, res,next) {
-    //     var found = req.params.brand;
-    //     console.log(req.params.brand);
-    //     synth.findOne({"brand": found}, function (err, found_synth) {
-    //         if (err) return next(err);
-    //         if (!found_synth) {
-    //             found_synth = {synth: req.params.brand};
-    //         }
-    //         res.type('text/html');
-    //         res.render('detail', {synth: found_synth} );    
-    //     });
-    // });
-    
-    
-    //Search function
+    //issues here body parser not interpreting search_term
     app.post('/search', function(req, res, next) {
-        var found = req.params.brand;
+        var found = req.body.search_term;
         synth.findOne({"brand": found}, function (err, found) {
             if (err) return next(err);
             if (!found) {
