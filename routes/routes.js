@@ -1,6 +1,6 @@
 module.exports = function(app){
 var synth = require ('../models/synths.js');
-
+// var synthapi = require ('../lib/synths.js');
 
 
 
@@ -19,24 +19,32 @@ app.use(function(req, res, next) {
 
 
 //api routes
-app.get('/api/synths', function(req,res){
-    synths = synth.getAll();
-    if (synths){
-    res.json(synth.getAll());
-    }else {
-        res.status(404).send("404 - not found");
-    }
-});
-
-app.get('/api/detail/:brand', function(req,res){
-   var found = synth.getSynth(req.params.brand);{
-            if(found !=''){
-                res.json(found);      
-            }else{
-                res.status(404).send("404 - not found");       
+app.get('/api/synths', function(req,res) {
+        synth.find(function (err, synths) {
+            if (err) return next(err);
+            if (synths) {
+                res.json(synths);    
+            } else {
+                res.status(404).send("404 - not found");    
             }
-}
-});
+        });
+    });
+
+
+
+
+ app.get('/api/detail/:brand', function(req,res) {
+        synth.findOne({"brand": req.params.brand}, function (err, found) {
+            if (found) {
+                res.json(found);    
+            } else {
+                res.status(404).send("404 - not found");    
+            }
+        });
+    });
+
+
+
 
 app.post('/api/add', function(req,res) {
         console.log(req.body);
@@ -89,7 +97,6 @@ app.get('/detail/:brand', function(req,res, next){
     });
 });
 
-    //issues here body parser not interpreting search_term
     app.post('/search', function(req, res, next) {
         var found = req.body.search_term;
         synth.findOne({"brand": found}, function (err, found) {
@@ -99,7 +106,7 @@ app.get('/detail/:brand', function(req,res, next){
             }
             res.type('text/html');
     console.log(found);
-            res.render('detail', {brand: found} );    
+            res.render('detail', {synth: found} );    
         });
     });
     
@@ -108,26 +115,27 @@ app.get('/detail/:brand', function(req,res, next){
 
 //issues here 
  app.post('/add', function(req,res) {
-         var newSynth = {"brand":req.params.brand, "model":req.params.model, "price":req.params.price};
-        synth.findByIdAndUpdate({_id:req.params.id}, newSynth, function(err, result) {
+         var newSynth = {"brand":req.body.brand, "model":req.body.model, "price":req.body.price};
+        synth.findByIdAndUpdate({"_id":req.body.id}, newSynth, {new: true}, function(err, result) {
             if (err) {
                     console.log(newSynth);
                 new synth(newSynth).save(function(err){
                 action = "Added";
-                 res.render('add', {synth: newSynth, result: "Added"} );            
+                 res.render('detail', {synth: newSynth, result: "Added"} );            
                 });
             } else {
-             res.render('add', {synth: newSynth, result: "Updated"} ); 
+             res.render('detail', {synth: newSynth, result: "Updated"} ); 
             }
         });
     });
 
 //issues here 
     app.post('/delete', function(req,res) {
-        synth.remove({"_id":req.params.id }, function(err) {
+        synth.remove({"model":req.body.model }, function(err, result) {
+            console.log(req.body.model);
             var action = (err) ? err : "Deleted";
             res.type('text/html');
-            res.render('detail', {synth: {}, result: action} );            
+            res.render('deleted', {synth: {}, result: action} );            
         });
     });
 };

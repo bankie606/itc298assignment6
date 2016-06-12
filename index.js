@@ -12,6 +12,7 @@ app.use(express.static('public'));
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 app.use(express.static(__dirname + '../views'));
+
 var routes = require('./routes/routes.js')(app); // passes ‘app’ instance to the routes module
 
 var handlebars = require('express-handlebars').create({defaultLayout: 'main', extname: '.hbs' });
